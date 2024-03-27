@@ -16,15 +16,22 @@ or not.
 
 The step fails when it was not run successfully on all matching agents.
 
-### OS support
-This step only supports Unix agents.
+### Limitations
+- This step only supports Unix agents
+- No Jenkins specific env variables are currently available during script execution, especially there is no WORKSPACE for apparent reasons
+
+### Details
+The given script is saved in the agents root directory as a temporary file and then executed with `/bin/sh -xe <file>` with the agent root directory being the current directory.
 
 ### Syntax 
+```
 execute_script_offline(label, reason, script)
+```
+
 
 ### Parameters
 | Name | Description |
 | ---- | ----------- |
-| label | A Jenkins label expression, e.g. build && linuxx86_64 |
-| reason | The message that will be set as the offline cause |
-| script | The script to execute |
+| `label` | A Jenkins label expression, e.g. build && linuxx86_64 |
+| `reason` | The message that will be set as the offline cause |
+| `script` | The script to execute, can be multiline. |

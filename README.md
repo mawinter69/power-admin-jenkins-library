@@ -2,4 +2,5 @@
 
 This jenkins library contains some powerful steps for Jenkins administrators.
 
-!!! Do not make this library available to everyone !!!
+[!CAUTION]
+Do not make this library available to everyone.

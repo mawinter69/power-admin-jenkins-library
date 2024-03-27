@@ -1,16 +1,16 @@
 package io.jenkins.mawinter69.pipeline_utils
 
-import hudson.model.Computer
+import hudson.model.Node
 
 class ExecResult
 {
-    final Computer computer
+    final Node node
     final String output
     final int exitCode
 
-    ExecResult(Computer computer, String output, int exitCode)
+    ExecResult(Node node, String output, int exitCode)
     {
-        this.computer = computer
+        this.node = node
         this.exitCode = exitCode
         this.output = output
     }

@@ -42,7 +42,6 @@ class Exec implements Callable<ExecResult>
         }
         else
         {
-            output += "Reasong: " + reason + "\n"
             def offline_cause = new OfflineCause.UserCause(User.getById(user, false), reason)
             computer.setTemporarilyOffline(true, offline_cause)
         }
@@ -82,6 +81,7 @@ class Exec implements Callable<ExecResult>
               .cmds(["/bin/sh", "-xe", script.getRemote()])
               .envs(env)
               .quiet(true)
+              .pwd(dir)
               .stdout(outputListener)
 
           def proc = launcher.launch(procStarter)
@@ -147,7 +147,7 @@ class Exec implements Callable<ExecResult>
             exitCode = 1
         }
 
-        return new ExecResult(computer, output, exitCode)
+        return new ExecResult(node, output, exitCode)
     }
 }
 
@@ -257,7 +257,7 @@ ${nodes.collect({Utils.nodeLink(it)}).join(", ")}
                   ex.printStackTrace()
               }
 
-              echo("Message: " + message.toString())
+              echo("Result: " + message.toString())
           }
       }
   }
