@@ -2,8 +2,7 @@
 
 ### Description
 
-Executes the same script on a number of agents in parallel. Before running the script the job will take the agent temporarily offline, wait for all builds to finish, 
-execute the script and then take it back online.
+Executes the same script on a number of agents in parallel. Before running the script the job will take the agent temporarily offline, wait for all builds to finish, execute the script and then take it back online. The execution happens independent of the nodes executors.
 
 If an agent was temporarily offline before it will not be taken online afterwards. Also the offline cause reason will not be changed.
 
@@ -25,7 +24,7 @@ The given script is saved in the agents root directory as a temporary file and t
 
 ### Syntax 
 ```
-execute_script_offline(label, reason, script)
+executeScriptOffline(label, reason, script)
 ```
 
 

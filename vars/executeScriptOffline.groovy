@@ -1,5 +1,5 @@
 def call(String label, String reason, String script) {
-  def runner = new io.jenkins.mawinter69.pipeline_utils.ExecAgentCommandOffline()
+  def runner = new io.jenkins.mawinter69.pipeline_utils.ExecAgentScriptOffline()
   runner.run(label, reason, getUser(), script)
 }
 
@@ -7,14 +7,10 @@ def call(String label, String reason, String script) {
 def getUser() {
   def cause = currentBuild.rawBuild.getCause(hudson.model.Cause.UserIdCause.class)
   if(cause == null) {
-    user = hudson.model.User.get("SYSTEM")
+    user = hudson.model.User.get("SYSTEM", false)
   }
   else {
-    user = hudson.model.User.get(cause.getUserId())
+    user = hudson.model.User.get(cause.getUserId(), false)
   }
-  if (user != null) {
-    return user.getId()
-  } else {
-    return "SYSTEM"
-  }
+  return user;
 }

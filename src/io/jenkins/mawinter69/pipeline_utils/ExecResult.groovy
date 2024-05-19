@@ -8,7 +8,7 @@ class ExecResult
     final String output
     final int exitCode
 
-    ExecResult(Node node, String output, int exitCode)
+    ExecResult(Node node, int exitCode, String output)
     {
         this.node = node
         this.exitCode = exitCode

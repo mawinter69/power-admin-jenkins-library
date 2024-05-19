@@ -4,12 +4,10 @@ import hudson.slaves.OfflineCause
 import hudson.model.User
 import hudson.model.Node
 import hudson.model.Computer
-import hudson.util.StreamTaskListener
-import java.io.ByteArrayOutputStream
 import java.util.concurrent.*
 import jenkins.model.Jenkins
 
-class Exec implements Callable<ExecResult>
+class ExecScriptOffline implements Callable<ExecResult>
 {
     Computer computer
     def node
@@ -42,7 +40,7 @@ class Exec implements Callable<ExecResult>
         }
         else
         {
-            def offline_cause = new OfflineCause.UserCause(User.getById(user, false), reason)
+            def offline_cause = new OfflineCause.UserCause(user, reason)
             computer.setTemporarilyOffline(true, offline_cause)
         }
     }
@@ -51,51 +49,12 @@ class Exec implements Callable<ExecResult>
     @NonCPS
     private executeCommand()
     {
-        ByteArrayOutputStream outputBuffer = null
-        ByteArrayOutputStream cmdBuffer = null
-        StreamTaskListener outputListener = null
-        StreamTaskListener cmdListener = null
-        def script = null
+        def exec = new ExecScriptOnNode(node, command, false, null)
 
-        if (computer.getChannel() == null)
-        {
-            output += "[Warning] Agent not connected: " + Utils.nodeLink(node) + "\n"
-            offlineNodes << node
-            return
-        }
-        try 
-        {
-          outputBuffer = new ByteArrayOutputStream()
-          cmdBuffer = new ByteArrayOutputStream()
-          outputListener = new StreamTaskListener(outputBuffer)
-          cmdListener = new StreamTaskListener(cmdBuffer)
+        def result = exec.run()
 
-          def launcher = node.createLauncher(cmdListener)
-
-          def env = [:]
-
-          def dir = node.getRootPath()
-          script = dir.createTextTempFile("_adm_exec_offline", ".sh", command, true);
-          
-          def procStarter = new hudson.Launcher.ProcStarter()
-              .cmds(["/bin/sh", "-xe", script.getRemote()])
-              .envs(env)
-              .quiet(true)
-              .pwd(dir)
-              .stdout(outputListener)
-
-          def proc = launcher.launch(procStarter)
-          proc.getStdout()
-          exitCode = proc.join()
-
-          output+=outputBuffer.toString()
-              
-        }
-        finally {
-          if (script!=null) try { script.delete() } catch (IOException e) {}
-          if (outputListener != null) outputListener.closeQuietly()
-          if (outputBuffer != null) try { outputBuffer.close() } catch (Exception ex) {}
-        }
+        output += result.output
+        exitCode = result.exitCode
     }
     
     @NonCPS
@@ -147,13 +106,13 @@ class Exec implements Callable<ExecResult>
             exitCode = 1
         }
 
-        return new ExecResult(node, output, exitCode)
+        return new ExecResult(node, exitCode, output)
     }
 }
 
 
 @NonCPS
-def run(String label, String offline_comment, String user, String script) {
+def run(String label, String offline_comment, User user, String script) {
  
   echo("""
 Parameters:
@@ -197,7 +156,7 @@ ${nodes.collect({Utils.nodeLink(it)}).join(", ")}
 
           try
           {
-              def future = completionService.submit(new Exec(node: node, user: user, command: script, offlineNodes: offlineNodes, reason: offline_comment))
+              def future = completionService.submit(new ExecScriptOffline(node: node, user: user, command: script, offlineNodes: offlineNodes, reason: offline_comment))
               futures[future] = node
           }
           catch (Exception e)
